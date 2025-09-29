@@ -23,16 +23,16 @@ const VoiceBot = () => {
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
   const startListening = () => {
-    console.log("🎤 Trying to start listening...");
+    console.log(" Trying to start listening...");
 
     if (!browserSupportsSpeechRecognition) {
-      setErrorMsg("❌ Your browser does not support speech recognition.");
+      setErrorMsg(" Your browser does not support speech recognition.");
       console.error("Speech recognition not supported.");
       return;
     }
 
     if (!isMicrophoneAvailable) {
-      setErrorMsg("❌ Microphone not available or permission denied.");
+      setErrorMsg(" Microphone not available or permission denied.");
       console.error("Microphone not available or permission denied.");
       return;
     }
@@ -50,8 +50,8 @@ const VoiceBot = () => {
 
       console.log("🎧 Listening started...");
     } catch (err) {
-      console.error("❌ Error starting SpeechRecognition:", err);
-      setErrorMsg("❌ Failed to start microphone: " + err.message);
+      console.error(" Error starting SpeechRecognition:", err);
+      setErrorMsg(" Failed to start microphone: " + err.message);
     }
   };
 
@@ -60,7 +60,7 @@ const VoiceBot = () => {
     SpeechRecognition.stopListening();
 
     if (!transcript.trim()) {
-      setErrorMsg("⚠️ You didn't say anything.");
+      setErrorMsg(" You didn't say anything.");
       return;
     }
 
@@ -78,19 +78,19 @@ const VoiceBot = () => {
 
       if (!response.ok) {
         const text = await response.text();
-        throw new Error(`❌ Error ${response.status}: ${text}`);
+        throw new Error(`Error ${response.status}: ${text}`);
       }
 
       const data = await response.json();
 
       if (!data.answer) {
-        throw new Error("❌ No answer received from backend.");
+        throw new Error(" No answer received from backend.");
       }
 
       setAnswer(data.answer);
       speak({ text: data.answer });
     } catch (error) {
-      setErrorMsg(error.message || "❌ Something went wrong.");
+      setErrorMsg(error.message || " Something went wrong.");
     } finally {
       setLoading(false);
       resetTranscript();
@@ -113,38 +113,38 @@ const VoiceBot = () => {
 
   return (
     <div className="max-w-lg mx-auto mt-16 p-8 bg-white rounded-xl shadow-lg text-gray-800 space-y-6">
-      <h1 className="text-3xl font-bold text-center">🎤 Ask Anything</h1>
+      <h1 className="text-3xl font-bold text-center">Ask Anything</h1>
 
       <div className="text-center">
         <button
           onClick={startListening}
           disabled={listening || loading}
           className={`px-6 py-3 rounded-lg text-lg font-medium transition-all duration-200 ${listening
-              ? "bg-gray-400 cursor-not-allowed text-white"
-              : "bg-purple-600 hover:bg-purple-700 text-white"
+            ? "bg-gray-400 cursor-not-allowed text-white"
+            : "bg-purple-600 hover:bg-purple-700 text-white"
             }`}
         >
-          {listening ? "🎧 Listening..." : "🗣️ Ask"}
+          {listening ? " Listening..." : " Ask"}
         </button>
       </div>
 
       <div className="space-y-2 text-sm">
         {errorMsg && (
-          <p className="text-red-600 bg-red-100 p-2 rounded">⚠️ {errorMsg}</p>
+          <p className="text-red-600 bg-red-100 p-2 rounded"> {errorMsg}</p>
         )}
         <p>
-          <span className="font-semibold text-gray-600">🟢 Status:</span>{" "}
+          <span className="font-semibold text-gray-600"> Status:</span>{" "}
           {listening ? "Listening..." : "Not Listening"}
         </p>
         <p>
-          <span className="font-semibold text-gray-600">🗣️ You Said:</span>{" "}
+          <span className="font-semibold text-gray-600"> You Said:</span>{" "}
           <span className="italic">{transcript || "---"}</span>
         </p>
         <p>
-          <span className="font-semibold text-gray-600">🤖 Gemini Says:</span>
+          <span className="font-semibold text-gray-600"> Ai Says:</span>
         </p>
         <div className="bg-green-100 p-4 rounded text-gray-800 min-h-[60px]">
-          {loading ? "⏳ Thinking..." : answer || "---"}
+          {loading ? "Thinking..." : answer || "---"}
         </div>
       </div>
     </div>
