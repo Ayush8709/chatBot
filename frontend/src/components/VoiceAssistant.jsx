@@ -9,8 +9,12 @@ const VoiceBot = () => {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [isAutoTriggered, setIsAutoTriggered] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false); //  Track AI voice status
 
-  const { speak } = useSpeechSynthesis();
+  const { speak, cancel } = useSpeechSynthesis({
+    onStart: () => setIsSpeaking(true),
+    onEnd: () => setIsSpeaking(false),
+  });
 
   const {
     transcript,
@@ -23,38 +27,26 @@ const VoiceBot = () => {
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
   const startListening = () => {
-    console.log(" Trying to start listening...");
-
     if (!browserSupportsSpeechRecognition) {
       setErrorMsg(" Your browser does not support speech recognition.");
-      console.error("Speech recognition not supported.");
       return;
     }
 
     if (!isMicrophoneAvailable) {
       setErrorMsg(" Microphone not available or permission denied.");
-      console.error("Microphone not available or permission denied.");
       return;
     }
 
-    try {
-      setErrorMsg("");
-      setAnswer("");
-      resetTranscript();
-      setIsAutoTriggered(false);
+    setErrorMsg("");
+    setAnswer("");
+    resetTranscript();
+    setIsAutoTriggered(false);
 
-      SpeechRecognition.startListening({
-        continuous: true,
-        language: "en-IN",
-      });
-
-      console.log("🎧 Listening started...");
-    } catch (err) {
-      console.error(" Error starting SpeechRecognition:", err);
-      setErrorMsg(" Failed to start microphone: " + err.message);
-    }
+    SpeechRecognition.startListening({
+      continuous: true,
+      language: "en-IN",
+    });
   };
-
 
   const stopAndAsk = async () => {
     SpeechRecognition.stopListening();
@@ -97,7 +89,6 @@ const VoiceBot = () => {
     }
   };
 
-  // Auto-stop and ask after 2s of silence
   useEffect(() => {
     if (!listening || isAutoTriggered) return;
 
@@ -118,8 +109,8 @@ const VoiceBot = () => {
       <div className="text-center">
         <button
           onClick={startListening}
-          disabled={listening || loading}
-          className={`px-6 py-3 rounded-lg text-lg font-medium transition-all duration-200 ${listening
+          disabled={listening || loading || isSpeaking}
+          className={`px-6 py-3 rounded-lg text-lg font-medium transition-all duration-200 ${listening || loading || isSpeaking
             ? "bg-gray-400 cursor-not-allowed text-white"
             : "bg-purple-600 hover:bg-purple-700 text-white"
             }`}
@@ -134,14 +125,14 @@ const VoiceBot = () => {
         )}
         <p>
           <span className="font-semibold text-gray-600"> Status:</span>{" "}
-          {listening ? "Listening..." : "Not Listening"}
+          {listening ? "Listening..." : isSpeaking ? "Speaking..." : "Idle"}
         </p>
         <p>
           <span className="font-semibold text-gray-600"> You Said:</span>{" "}
           <span className="italic">{transcript || "---"}</span>
         </p>
         <p>
-          <span className="font-semibold text-gray-600"> Ai Says:</span>
+          <span className="font-semibold text-gray-600"> Gemini Says:</span>
         </p>
         <div className="bg-green-100 p-4 rounded text-gray-800 min-h-[60px]">
           {loading ? "Thinking..." : answer || "---"}
