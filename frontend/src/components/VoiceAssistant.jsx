@@ -23,26 +23,38 @@ const VoiceBot = () => {
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
   const startListening = () => {
+    console.log("🎤 Trying to start listening...");
+
     if (!browserSupportsSpeechRecognition) {
       setErrorMsg("❌ Your browser does not support speech recognition.");
+      console.error("Speech recognition not supported.");
       return;
     }
 
-    if (isMicrophoneAvailable === false) {
+    if (!isMicrophoneAvailable) {
       setErrorMsg("❌ Microphone not available or permission denied.");
+      console.error("Microphone not available or permission denied.");
       return;
     }
 
-    setErrorMsg("");
-    setAnswer("");
-    resetTranscript();
-    setIsAutoTriggered(false);
+    try {
+      setErrorMsg("");
+      setAnswer("");
+      resetTranscript();
+      setIsAutoTriggered(false);
 
-    SpeechRecognition.startListening({
-      continuous: true,
-      language: "en-IN",
-    });
+      SpeechRecognition.startListening({
+        continuous: true,
+        language: "en-IN",
+      });
+
+      console.log("🎧 Listening started...");
+    } catch (err) {
+      console.error("❌ Error starting SpeechRecognition:", err);
+      setErrorMsg("❌ Failed to start microphone: " + err.message);
+    }
   };
+
 
   const stopAndAsk = async () => {
     SpeechRecognition.stopListening();
@@ -107,11 +119,10 @@ const VoiceBot = () => {
         <button
           onClick={startListening}
           disabled={listening || loading}
-          className={`px-6 py-3 rounded-lg text-lg font-medium transition-all duration-200 ${
-            listening
+          className={`px-6 py-3 rounded-lg text-lg font-medium transition-all duration-200 ${listening
               ? "bg-gray-400 cursor-not-allowed text-white"
               : "bg-purple-600 hover:bg-purple-700 text-white"
-          }`}
+            }`}
         >
           {listening ? "🎧 Listening..." : "🗣️ Ask"}
         </button>
